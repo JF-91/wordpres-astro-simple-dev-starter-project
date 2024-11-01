@@ -1,0 +1,67 @@
+networks:
+    backend-for-astro-1:
+        driver: bridge
+
+services:
+    mysql:
+        image: mysql:8.4.3
+        container_name: backend-for-astro-1-mysql
+        tty: true
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        networks:
+            - backend-for-astro-1
+
+    server:
+        build: 
+          context: .
+        container_name: backend-for-astro-1-server
+        ports:
+            - "80:80"
+        volumes:
+            - "./var/www/html/:/var/www/html"
+        environment:
+            WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+            WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+            WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+            WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+        depends_on:
+            - mysql
+        networks:
+            - backend-for-astro-1
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: ds-backend-for-astro-1-dbadmin
+        ports:
+            - "8000:80"
+        environment:
+            PMA_HOST: backend-for-astro-1-mysql
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        depends_on:
+            - mysql
+        networks:
+            - backend-for-astro-1
+
+    frontend-build:
+        build:
+          context: ./client
+          dockerfile: Dockerfile.build
+        container_name: backend-for-astro-1-frontend-build
+        networks:
+            - backend-for-astro-1
+        ports:
+            - "8080:8080"
+        volumes:
+            - frontend_dist:/usr/share/nginx/html
+volumes:
+    mysql_data:
+    frontend_dist:
+      
