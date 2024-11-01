@@ -4,8 +4,4 @@ chmod -R 777 /var/www/html
 
 chmod -R 777 var/www/html
 
-# prod
-docker-compose run frontend-build
-
-# dev
-docker-compose up frontend-dev
+for env  =>.var to /var
